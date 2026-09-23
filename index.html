@@ -1,29 +1,7 @@
 <!doctype html>
-<html lang="es">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-  <meta name="theme-color" content="#111827">
-  <title>Uniforme Virtual</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <main class="app">
-    <header><h1>Uniforme Virtual</h1><p>Apuntá a una persona y sorprendela.</p></header>
-    <section class="camera" id="camera">
-      <video id="video" autoplay playsinline muted></video>
-      <img id="uniform" src="assets/uniforme.svg" alt="Uniforme virtual">
-      <div class="guide">Ubicá el rostro dentro del uniforme</div>
-    </section>
-    <section class="controls">
-      <button id="start">Iniciar cámara</button>
-      <button id="capture" disabled>📸 Sacar foto</button>
-    </section>
-    <section id="result" class="result hidden">
-      <canvas id="canvas"></canvas>
-      <div class="controls"><button id="again">Otra foto</button><a id="download" download="uniforme-virtual.jpg">Guardar foto</a></div>
-    </section>
-  </main>
-  <script src="app.js"></script>
-</body>
-</html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07101f"><title>Uniforme Virtual</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="app"><header><h1>Uniforme Virtual</h1><p>Apuntá a una persona y sorprendela.</p></header>
+<section class="camera" id="cameraView"><video id="video" autoplay playsinline muted></video><div class="uniform-placeholder"><div class="neck"></div><div class="jacket"><span class="badge">★</span></div></div><div class="guide">Ubicá rostro y hombros dentro del encuadre</div></section>
+<div class="controls"><button id="startBtn">Activar cámara</button><button id="shotBtn" disabled>📸 Sacar foto</button></div>
+<section id="result" class="result hidden"><canvas id="canvas"></canvas><div class="controls"><a id="downloadBtn" download="uniforme-virtual.jpg">Guardar foto</a><button id="againBtn">Otra foto</button></div></section>
+</main><script src="app.js"></script></body></html>
