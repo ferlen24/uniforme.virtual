@@ -1,4 +1,4 @@
-import { drawUniform, uniformsReady } from './uniform.js?v=5';
+import { drawUniform, uniformsReady } from './uniform.js?v=6';
 
 const MP = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.14';
 const MODEL = 'https://storage.googleapis.com/mediapipe-models/face_detector/blaze_face_short_range/float16/1/blaze_face_short_range.tflite';
@@ -15,7 +15,7 @@ const state = {
   vision: null, files: null, detector: null, imageDetector: null,
   pose: null, lastSeen: 0, lastTs: 0, lum: 0.5, frame: 0, raf: 0, busy: false,
 };
-const res = { snap: null, base: null, dx: 0, dy: 0, scale: 1, pending: 0 };
+const res = { snap: null, base: null, dx: 0, dy: 0, scale: 1, pending: 0, blob: null, blobTimer: 0, ver: 0 };
 
 function show(name) {
   for (const s of screens) $(s).classList.toggle('active', s === name);
@@ -125,6 +125,36 @@ function paintUniform(c, W, H, pose, lum) {
   c.drawImage(layer, 0, 0);
 }
 
+// Franja con la leyenda del evento (se ve en vivo y queda en la foto).
+function drawBrand(c, W, H) {
+  const h = Math.round(W * 0.12), y = H - h;
+  const g = c.createLinearGradient(0, y - h * 0.5, 0, H);
+  g.addColorStop(0, 'rgba(7,16,31,0)');
+  g.addColorStop(0.35, 'rgba(7,16,31,.8)');
+  g.addColorStop(1, 'rgba(7,16,31,.94)');
+  c.fillStyle = g;
+  c.fillRect(0, y - h * 0.5, W, h * 1.5);
+  c.fillStyle = '#e2b845';
+  c.fillRect(W * 0.1, y + h * 0.14, W * 0.8, Math.max(1, W * 0.003));
+
+  const parts = [['EXPO 2026', '#f3d27a'], ['  •  ', '#e2b845'], ['TUCUMÁN', '#fff'], ['  •  ', '#e2b845'], ['IESP', '#fff']];
+  c.save();
+  c.font = `800 ${Math.round(h * 0.34)}px system-ui, -apple-system, "Segoe UI", sans-serif`;
+  c.textBaseline = 'middle';
+  c.textAlign = 'left';
+  const total = parts.reduce((t, [str]) => t + c.measureText(str).width, 0);
+  const k = Math.min(1, (W * 0.9) / total);
+  c.translate(W / 2, y + h * 0.55);
+  c.scale(k, k);
+  let x = -total / 2;
+  for (const [str, col] of parts) {
+    c.fillStyle = col;
+    c.fillText(str, x, 0);
+    x += c.measureText(str).width;
+  }
+  c.restore();
+}
+
 function drawGuide(c, W, H) {
   const p = toPx(DEFAULT_POSE, W, H), d = p.d;
   c.save();
@@ -175,7 +205,7 @@ async function startCamera() {
 
 function sizeView() {
   const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const w = Math.round(view.clientWidth * dpr);
+  const w = Math.round(Math.min(view.clientWidth, view.clientHeight * 0.75) * dpr);
   if (w && view.width !== w) { view.width = w; view.height = Math.round(w * 4 / 3); }
 }
 
@@ -209,6 +239,7 @@ function loop() {
   } else {
     drawGuide(vctx, W, H);
   }
+  drawBrand(vctx, W, H);
   const hint = !state.detector ? 'Ubicá el rostro dentro del óvalo'
     : seen ? '¡Listo! Sacá la foto' : 'Ubicá el rostro dentro del óvalo';
   if ($('hint').textContent !== hint) $('hint').textContent = hint;
@@ -243,7 +274,7 @@ async function capture() {
   flash.classList.add('go');
 
   const vw = video.videoWidth, vh = video.videoHeight, crop = cropRect(vw, vh);
-  const scale = Math.min(1, 1600 / crop.sh);
+  const scale = Math.min(1, 1440 / crop.sh);
   const snap = document.createElement('canvas');
   snap.width = Math.round(crop.sw * scale);
   snap.height = Math.round(crop.sh * scale);
@@ -260,7 +291,7 @@ async function fromGallery(file) {
   if (!file) return;
   const img = await createImageBitmap(file).catch(() => null);
   if (!img) { alert('No se pudo abrir la imagen.'); return; }
-  const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+  const scale = Math.min(1, 1440 / Math.max(img.width, img.height));
   const snap = document.createElement('canvas');
   snap.width = Math.round(img.width * scale);
   snap.height = Math.round(img.height * scale);
@@ -294,6 +325,8 @@ function renderResult() {
   octx.drawImage(snap, 0, 0);
   const pose = currentPose();
   paintUniform(octx, W, H, pose, sampleLum(octx, toPx(pose, W, H), W, H));
+  drawBrand(octx, W, H);
+  prepareBlob();
 }
 
 function scheduleRender() {
@@ -312,24 +345,54 @@ function fileName() {
   return `uniforme-${slug}.jpg`;
 }
 
-const toBlob = () => new Promise(r => out.toBlob(r, 'image/jpeg', 0.92));
+const encode = () => new Promise(r => out.toBlob(r, 'image/jpeg', 0.9));
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+let canShareFiles = false;
+
+// La foto se codifica apenas se termina de acomodar, así "Guardar" es instantáneo.
+function prepareBlob() {
+  clearTimeout(res.blobTimer);
+  res.blob = null;
+  const ver = ++res.ver;
+  res.blobTimer = setTimeout(async () => {
+    const blob = await encode();
+    if (ver === res.ver) res.blob = blob;
+  }, 250);
+}
+
+const getBlob = async () => res.blob || encode();
+
+function flashLabel(btn, text) {
+  const label = btn.querySelector('span'), old = btn.dataset.label ||= label.textContent;
+  label.textContent = text;
+  clearTimeout(btn._t);
+  btn._t = setTimeout(() => { label.textContent = old; }, 1800);
+}
+
+async function shareBlob(blob) {
+  const file = new File([blob], fileName(), { type: 'image/jpeg' });
+  try {
+    await navigator.share({ files: [file], title: 'Uniforme Virtual' });
+  } catch (e) { /* cancelado */ }
+}
 
 async function save() {
-  const url = URL.createObjectURL(await toBlob());
+  const blob = await getBlob();
+  // En iPhone la hoja de compartir tiene "Guardar imagen", que la manda directo a Fotos.
+  if (isIOS && canShareFiles) return shareBlob(blob);
+  const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
   a.download = fileName();
   document.body.appendChild(a);
   a.click();
   a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 5000);
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+  flashLabel($('saveBtn'), '¡Guardada!');
 }
 
 async function share() {
-  const file = new File([await toBlob()], fileName(), { type: 'image/jpeg' });
-  try {
-    await navigator.share({ files: [file], title: 'Uniforme Virtual' });
-  } catch (e) { /* cancelado */ }
+  shareBlob(await getBlob());
 }
 
 /* ---------- Vista previa del inicio ---------- */
@@ -432,7 +495,8 @@ out.addEventListener('pointercancel', () => { drag = null; });
 
 try {
   const probe = new File([new Blob()], 'x.jpg', { type: 'image/jpeg' });
-  if (navigator.canShare?.({ files: [probe] })) $('shareBtn').classList.remove('hidden');
+  canShareFiles = !!navigator.canShare?.({ files: [probe] });
+  if (canShareFiles) $('shareBtn').classList.remove('hidden');
 } catch (e) { /* sin share */ }
 
 setGender('m');

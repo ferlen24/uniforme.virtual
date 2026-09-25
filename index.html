@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#0a1628">
 <title>Uniforme Virtual</title>
-<link rel="stylesheet" href="style.css?v=5">
+<link rel="stylesheet" href="style.css?v=6">
 </head>
 <body>
 <main class="app">
@@ -23,7 +23,7 @@
       <label class="step" for="surname">2. Tu apellido (va en la placa)</label>
       <input id="surname" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="Ej: LENCINA">
       <button id="goBtn" class="primary">Empezar</button>
-      <p class="foot">I.E.S.P. Ntra. Sra. del Carmen</p>
+      <p class="foot"><b>Expo 2026</b> · Tucumán · IESP</p>
     </div>
   </section>
 
@@ -32,7 +32,7 @@
       <button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
       <div><h1>Uniforme Virtual</h1><p>Apuntá a una persona y sorprendela.</p></div>
     </header>
-    <div class="stage">
+    <div class="stage-wrap"><div class="stage">
       <canvas id="view"></canvas>
       <div class="seg" role="group" aria-label="Uniforme">
         <button data-gender="m">Hombre</button><button data-gender="f">Mujer</button>
@@ -44,7 +44,7 @@
         <p>No se pudo abrir la cámara.</p>
         <p>Permití el acceso a la cámara o elegí una foto de la galería.</p>
       </div>
-    </div>
+    </div></div>
     <div class="dock">
       <button id="flipBtn" class="tool">
         <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7"/><path d="M18 2v5h-5M6 22v-5h5"/></svg></span>
@@ -76,14 +76,14 @@
     </div>
     <p class="tip">Arrastrá sobre la foto para acomodar el uniforme.</p>
     <div class="actions">
-      <button id="saveBtn" class="pill"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Guardar foto</button>
-      <button id="shareBtn" class="pill hidden"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>
-      <button id="againBtn" class="pill"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7"/><path d="M18 2v5h-5M6 22v-5h5"/></svg>Otra foto</button>
+      <button id="saveBtn" class="pill"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg><span>Guardar foto</span></button>
+      <button id="shareBtn" class="pill hidden"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>Compartir</span></button>
+      <button id="againBtn" class="pill"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7"/><path d="M18 2v5h-5M6 22v-5h5"/></svg><span>Otra foto</span></button>
     </div>
   </section>
 
 </main>
 <video id="video" class="feed" autoplay playsinline muted></video>
-<script type="module" src="app.js?v=5"></script>
+<script type="module" src="app.js?v=6"></script>
 </body>
 </html>

@@ -11,7 +11,7 @@ button, input { font: inherit; }
 button { cursor: pointer; }
 svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-.app { max-width: 520px; margin: auto; padding: 0 16px env(safe-area-inset-bottom); min-height: 100dvh; }
+.app { max-width: 520px; margin: auto; padding: 0 16px; }
 .screen { display: none; flex-direction: column; min-height: 100dvh; }
 .screen.active { display: flex; }
 .hidden { display: none !important; }
@@ -35,16 +35,21 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 #surname { width: 100%; padding: 14px 16px; border-radius: 14px; border: 2px solid #ffffff22; background: #0f1f38; color: #fff; font-size: 1.1rem; text-transform: uppercase; letter-spacing: .04em; }
 #surname:focus { outline: none; border-color: #e2b845; }
 .primary { margin-top: 8px; border: 0; border-radius: 999px; padding: 16px; font-size: 1.15rem; font-weight: 800; background: linear-gradient(#f3d27a, #d9a93a); color: #1a1405; box-shadow: 0 8px 24px #d9a93a40; }
-.foot { text-align: center; color: #7f8ea5; font-size: .85rem; margin: 6px 0 0; }
+.foot b { color: #e2b845; }
+.foot { text-align: center; color: #9fb0c8; font-size: .85rem; margin: 6px 0 0; }
 
 /* Cámara */
-.stage { position: relative; width: min(100%, calc((100dvh - 250px) * .75)); aspect-ratio: 3/4; margin: 0 auto; background: #000; border-radius: 22px; overflow: hidden; box-shadow: 0 12px 35px #0008; }
-.stage canvas { display: block; width: 100%; height: 100%; }
+/* La pantalla de cámara ocupa exactamente el alto visible: la foto se achica y el botón nunca queda afuera. */
+#camera.active { height: 100vh; height: 100dvh; min-height: 0; }
+#camera .bar { padding-bottom: 8px; }
+.stage-wrap { flex: 1 1 auto; min-height: 0; display: flex; align-items: center; justify-content: center; }
+.stage { position: relative; height: 100%; width: auto; max-width: 100%; aspect-ratio: 3/4; background: #000; border-radius: 22px; overflow: hidden; box-shadow: 0 12px 35px #0008; }
+.stage canvas { display: block; width: 100%; height: 100%; object-fit: contain; }
 .seg { position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: flex; background: #000a; border-radius: 999px; padding: 3px; backdrop-filter: blur(6px); }
 .seg button { border: 0; background: none; color: #fff; padding: 7px 14px; border-radius: 999px; font-weight: 700; font-size: .85rem; }
 .seg button.selected { background: #fff; color: #0f172a; }
 .seg.inline { position: static; transform: none; background: #ffffff14; }
-.hint { position: absolute; left: 50%; bottom: 14px; transform: translateX(-50%); background: #000b; padding: 9px 16px; border-radius: 12px; font-size: .95rem; white-space: nowrap; }
+.hint { position: absolute; left: 50%; bottom: 14%; transform: translateX(-50%); background: #000b; padding: 9px 16px; border-radius: 12px; font-size: .95rem; white-space: nowrap; }
 .count { position: absolute; inset: 0; display: grid; place-items: center; font-size: 7rem; font-weight: 900; text-shadow: 0 4px 24px #000a; pointer-events: none; }
 .count.pop { animation: pop 1s ease-out; }
 @keyframes pop { from { transform: scale(1.6); opacity: 0; } 20% { opacity: 1; } to { transform: scale(.9); opacity: .2; } }
@@ -54,13 +59,13 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .cam-error { position: absolute; inset: 0; display: grid; align-content: center; padding: 24px; text-align: center; background: #0a1628; color: #dbe4f0; }
 .cam-error p { margin: 4px 0; }
 
-.dock { display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; padding: 14px 0 18px; margin-top: auto; }
+.dock { flex: none; display: grid; grid-template-columns: 1fr auto 1fr; align-items: start; padding: 10px 0 calc(10px + env(safe-area-inset-bottom)); }
 .tool { justify-self: center; border: 0; background: none; color: #cbd5e1; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
-.tool .ic { width: 58px; height: 58px; border-radius: 50%; background: #ffffff14; display: grid; place-items: center; color: #fff; }
+.tool .ic { width: 54px; height: 54px; border-radius: 50%; background: #ffffff14; display: grid; place-items: center; color: #fff; }
 .tool .ic svg { width: 26px; height: 26px; }
 .tool small, .shutter small { font-size: .85rem; }
 .shutter { border: 0; background: none; color: #fff; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 0; }
-.shutter span { width: 78px; height: 78px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px #0a1628, 0 0 0 7px #fff; margin-top: 4px; transition: transform .1s; }
+.shutter span { width: 70px; height: 70px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 4px #0a1628, 0 0 0 7px #fff; margin-top: 4px; transition: transform .1s; }
 .shutter:active span { transform: scale(.92); }
 .shutter small { font-weight: 800; font-size: .95rem; margin-top: 4px; }
 
@@ -74,3 +79,12 @@ svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width:
 .tip { text-align: center; color: #8595ad; font-size: .82rem; margin: 6px 0 0; }
 .actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; padding: 14px 0 20px; }
 .pill { display: inline-flex; align-items: center; gap: 10px; border: 0; border-radius: 999px; padding: 14px 22px; background: #fff; color: #0f172a; font-weight: 750; font-size: 1.05rem; }
+@media (max-height: 720px) {
+  #camera .bar p { display: none; }
+  #camera .bar h1 { font-size: 1.3rem; }
+  .shutter small, .tool small { display: none; }
+}
+@supports (width: 1cqw) {
+  .stage-wrap { container-type: size; }
+  .stage { height: auto; width: min(100cqw, 75cqh); }
+}
