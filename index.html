@@ -1,1 +1,89 @@
-<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#07101f"><title>Uniforme Virtual</title><link rel="stylesheet" href="style.css?v=3"></head><body><main class="app"><header><h1>Uniforme Virtual</h1><p>Apuntá a una persona y sorprendela.</p></header><section class="camera" id="cameraView"><video id="video" autoplay playsinline muted></video><div class="overlay"><div class="cap"><span class="capBadge">☀</span></div><div class="collar left"></div><div class="collar right"></div><div class="coat"><span class="ep epL">✦ ✦</span><span class="ep epR">✦ ✦</span><span class="name">UNIFORME</span><span class="insignia">★</span><span class="btn b1">●</span><span class="btn b2">●</span><span class="btn b3">●</span></div></div><div class="faceGuide"></div><div class="guide">Ubicá la cara dentro del óvalo</div></section><div class="controls"><button id="startBtn">Activar cámara</button><button id="shotBtn" disabled>📸 Sacar foto</button></div><section id="result" class="result hidden"><canvas id="canvas"></canvas><div class="controls"><a id="downloadBtn" download="uniforme-virtual.jpg">Guardar foto</a><button id="againBtn">Otra foto</button></div></section></main><script src="app.js?v=3"></script></body></html>
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0a1628">
+<title>Uniforme Virtual</title>
+<link rel="stylesheet" href="style.css?v=5">
+</head>
+<body>
+<main class="app">
+
+  <section id="start" class="screen active">
+    <header class="bar">
+      <div><h1>Uniforme Virtual</h1><p>Mirate con el uniforme puesto.</p></div>
+    </header>
+    <div class="start-body">
+      <p class="step">1. Elegí el uniforme</p>
+      <div class="genders">
+        <button class="gcard" data-gender="m" aria-pressed="true"><canvas width="240" height="300" data-preview="m"></canvas><span>Hombre</span></button>
+        <button class="gcard" data-gender="f" aria-pressed="false"><canvas width="240" height="300" data-preview="f"></canvas><span>Mujer</span></button>
+      </div>
+      <label class="step" for="surname">2. Tu apellido (va en la placa)</label>
+      <input id="surname" maxlength="16" autocomplete="off" autocapitalize="characters" placeholder="Ej: LENCINA">
+      <button id="goBtn" class="primary">Empezar</button>
+      <p class="foot">I.E.S.P. Ntra. Sra. del Carmen</p>
+    </div>
+  </section>
+
+  <section id="camera" class="screen">
+    <header class="bar">
+      <button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div><h1>Uniforme Virtual</h1><p>Apuntá a una persona y sorprendela.</p></div>
+    </header>
+    <div class="stage">
+      <canvas id="view"></canvas>
+      <div class="seg" role="group" aria-label="Uniforme">
+        <button data-gender="m">Hombre</button><button data-gender="f">Mujer</button>
+      </div>
+      <div id="hint" class="hint">Ubicá el rostro dentro del óvalo</div>
+      <div id="count" class="count hidden"></div>
+      <div id="flash" class="flash"></div>
+      <div id="camError" class="cam-error hidden">
+        <p>No se pudo abrir la cámara.</p>
+        <p>Permití el acceso a la cámara o elegí una foto de la galería.</p>
+      </div>
+    </div>
+    <div class="dock">
+      <button id="flipBtn" class="tool">
+        <span class="ic"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7"/><path d="M18 2v5h-5M6 22v-5h5"/></svg></span>
+        <small>Girar cámara</small>
+      </button>
+      <button id="shotBtn" class="shutter" aria-label="Sacar foto"><span></span><small>Sacar foto</small></button>
+      <label class="tool">
+        <input id="fileInput" type="file" accept="image/*" hidden>
+        <span class="ic"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 17l-5-5-9 8"/></svg></span>
+        <small>Galería</small>
+      </label>
+    </div>
+  </section>
+
+  <section id="result" class="screen">
+    <header class="bar">
+      <button class="back" data-back aria-label="Volver"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <div><h1>Uniforme Virtual</h1><p>¡Así te queda!</p></div>
+    </header>
+    <div class="result-stage">
+      <canvas id="out"></canvas>
+    </div>
+    <div class="adjust">
+      <div class="seg inline" role="group" aria-label="Uniforme">
+        <button data-gender="m">Hombre</button><button data-gender="f">Mujer</button>
+      </div>
+      <label>Tamaño <input id="size" type="range" min="70" max="140" value="100"></label>
+      <button id="resetBtn" class="link">Centrar</button>
+    </div>
+    <p class="tip">Arrastrá sobre la foto para acomodar el uniforme.</p>
+    <div class="actions">
+      <button id="saveBtn" class="pill"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M4 20h16"/></svg>Guardar foto</button>
+      <button id="shareBtn" class="pill hidden"><svg viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg>Compartir</button>
+      <button id="againBtn" class="pill"><svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 0 1-13.7 5.7M4 12a8 8 0 0 1 13.7-5.7"/><path d="M18 2v5h-5M6 22v-5h5"/></svg>Otra foto</button>
+    </div>
+  </section>
+
+</main>
+<video id="video" class="feed" autoplay playsinline muted></video>
+<script type="module" src="app.js?v=5"></script>
+</body>
+</html>
